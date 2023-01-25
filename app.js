@@ -8,10 +8,12 @@ const mongoDb = process.env.DB;
 mongoose.connect(mongoDb, { useUnifiedTopology: true, useNewUrlParser: true });
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Error connecting to Mongo DB"));
-console.log(db);
 const app = express();
 
+app.use(express.json());
+
 //Routes
+
 app.use('/user', routes.user);
 app.use('/post', routes.post);
 app.use('/comment', routes.comment);
