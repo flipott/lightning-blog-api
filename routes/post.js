@@ -14,6 +14,7 @@ router.get("/", (req, res) => {
 
 // Create new post
 router.post("/", (req, res, next) => {
+    console.log(req.user);
     const post = new Post({
         title: req.body.title,
         body: req.body.body,
