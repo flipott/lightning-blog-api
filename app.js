@@ -13,12 +13,9 @@ const app = express();
 app.use(express.json());
 
 //Routes
-
 app.use('/user', routes.user);
 app.use('/post', routes.post);
-app.use('/comment', routes.comment);
-
-
+app.use('/post/:postId/comments', routes.comment);
 
 
 app.listen(3000, () => console.log("Server is currently running on port 3000."));
