@@ -1,6 +1,9 @@
 const Post = require("../models/post");
 const commentRouter = require("./comment");
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+const auth = require("../middleware/auth");
+require('dotenv').config()
 
 // Get all posts
 router.get("/", (req, res) => {
@@ -13,17 +16,22 @@ router.get("/", (req, res) => {
 });
 
 // Create new post
-router.post("/", (req, res, next) => {
-    console.log(req.user);
-    const post = new Post({
-        title: req.body.title,
-        body: req.body.body,
-        username: req.body.username,
-    }).save((err, results) => {
+router.post("/", auth, (req, res, next) => {
+    jwt.verify(req.token, process.env.SECRET_KEY, (err, data) => {
         if (err) {
-            return next(err);
+            res.sendStatus(403);
+        } else {
+            const post = new Post({
+                title: req.body.title,
+                body: req.body.body,
+                username: req.body.username,
+            }).save((err, results) => {
+                if (err) {
+                    return next(err);
+                }
+                res.send("Post successfully created.");
+            });
         }
-        res.send("Post successfully created.");
     });
 });
 
