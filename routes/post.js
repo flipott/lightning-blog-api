@@ -1,11 +1,8 @@
 const Post = require("../models/post");
-const Comment = require("../models/comment");
-const { Schema } = require("mongoose");
+const commentRouter = require("./comment");
 const router = require("express").Router();
-const mongoose = require('mongoose');
 
-// POSTS
-
+// Get all posts
 router.get("/", (req, res) => {
     Post.find({}, (err, results) => {
         if (err) {
@@ -15,16 +12,7 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/:postId", (req, res, next) => {
-    Post.find({ id: req.params.postId }, (err, results) => {
-        if (err) {
-            return next(err);
-        }
-        res.send(results);
-    });
-});
-
-
+// Create new post
 router.post("/", (req, res, next) => {
     const post = new Post({
         title: req.body.title,
@@ -34,73 +22,45 @@ router.post("/", (req, res, next) => {
         if (err) {
             return next(err);
         }
+        res.send("Post successfully created.");
+    });
+});
+
+// Get specific post
+router.get("/:postId", (req, res, next) => {
+    Post.find({ _id: req.params.postId }, (err, results) => {
+        if (err) {
+            return next(err);
+        }
         res.send(results);
     });
 });
 
-// COMMENTS
+// Update specific post
+router.put("/:postId", (req, res, next) => {
+    Post.findByIdAndUpdate(
+        req.params.postId,
+        {
+            title: req.body.title,
+            body: req.body.body
+        },
+        {safe: true, upsert: true, new : true},
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            res.send("Successfully updated post.");
+        });
+});
 
-router.get("/:postId/:comments", (req, res, next) => {
-    Post.find({ id: req.params.postId }, (err, results) => {
+// Delete specific post
+router.delete("/:postId", (req, res, next) => {
+    Post.findByIdAndDelete(req.params.postId, (err, results) => {
         if (err) {
             return next(err);
         }
-        res.send(results[0].comments);
+        res.send("Successfully deleted post.");
     });
 });
-
-router.post("/:postId/:comments", (req, res, next) => {
-    const comment = new Comment({
-        author: req.body.author,
-        body: req.body.body,
-    }).save((err, results) => {
-        if (err) {
-            return next(err);
-        }
-        Post.findByIdAndUpdate(
-            req.params.postId,
-            {$push: { comments: results }},
-            {safe: true, upsert: true, new : true},
-            (err, results) => {
-                if (err) {
-                    return next(err);
-                }
-                res.send("Successfully added comment to post.");
-            });
-    });
-});
-
-router.get("/:postId/:comments/:commentId", (req, res, next) => {
-    Comment.find({ id: req.params.commentId }, (err, results) => {
-        if (err) {
-            return next(err);
-        }
-        res.send(results[0]);
-    });
-});
-
-router.delete("/:postId/:comments/:commentId", (req, res, next) => {
-    Comment.findByIdAndDelete(req.params.commentId, (err, results) => {
-        if (err) {
-            return next(err);
-        }
-        Post.findByIdAndUpdate(
-            req.params.postId,
-            {$pull: { "comments._id" : mongoose.id(req.params.commentId)} },
-            {safe: true, new: true},
-            (err, results) => {
-                if (err) {
-                    return next(err);
-                }
-                res.send("Comment successfully deleted.");
-            });
-    });
-});
-
-
-
-
-
-
 
 module.exports = router;
