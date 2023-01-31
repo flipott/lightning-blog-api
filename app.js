@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const routes = require("./routes");
 const User = require("./models/user");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 require('dotenv').config()
 
 const { API_PORT } = process.env;
@@ -15,6 +16,7 @@ db.on("error", console.error.bind(console, "Error connecting to Mongo DB"));
 const app = express();
 
 app.use(express.json());
+app.use(cors())
 
 //Routes
 app.use('/user', routes.user);
